@@ -922,7 +922,7 @@ static s_DamageFeedMaxUpdateRate = 250;
 static s_VehiclePassengerDamage = false;
 static s_VehicleUnoccupiedDamage = false;
 static Float:s_FallDeathVelocity = -0.6;
-static s_DamageTakenSound = 1190;
+static s_DamageTakenSound = 1131;
 static s_DamageGivenSound = 17802;
 static s_RejectedHits[MAX_PLAYERS][WC_MAX_REJECTED_HITS][E_REJECTED_HIT];
 static s_RejectedHitsIdx[MAX_PLAYERS];
@@ -4207,7 +4207,7 @@ static ScriptInit()
 	if (s_LagCompMode) {
 		SetKnifeSync(false);
 	} else {
-		s_DamageTakenSound = 0;
+		//s_DamageTakenSound = 0;
 		SetKnifeSync(true);
 	}
 
