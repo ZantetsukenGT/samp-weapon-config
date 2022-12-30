@@ -70,6 +70,16 @@
 	#define WC_HEALTH_BAR_BG_COLOR 0x5A0C0EFF // dark red
 #endif
 
+// Healthbar text color
+#if !defined WC_HEALTH_TEXT_COLOR
+	#define WC_HEALTH_TEXT_COLOR 0xFFFFFFFF // white
+#endif
+
+// Armourbar text color
+#if !defined WC_ARMOUR_TEXT_COLOR
+	#define WC_ARMOUR_TEXT_COLOR 0x000000FF // black
+#endif
+
 #if WC_USE_STREAMER && !defined Streamer_IncludeFileVersion
 	#error streamer.inc is required when WC_USE_STREAMER=true
 #endif
@@ -312,6 +322,10 @@ forward OnPlayerPrepareDeath(playerid, animlib[32], animname[32], &anim_lock, &r
 forward OnPlayerDeathFinished(playerid, bool:cancelable);
 // When a shot or damage given is rejected
 forward OnRejectedHit(playerid, hit[E_REJECTED_HIT]);
+// When health bar text is being updated
+forward OnHealthBarTextUpdate(playerid, health, armour, text[WC_MAX_WEAPON_NAME]);
+// When armour bar text is being updated
+forward OnArmourBarTextUpdate(playerid, health, armour, text[WC_MAX_WEAPON_NAME]);
 
 #if WC_CUSTOM_VENDING_MACHINES
 	// When a player is about to use a vending machine
@@ -957,6 +971,8 @@ static s_SyncData[MAX_PLAYERS][E_RESYNC_DATA];
 static Text:s_HealthBarBorder = Text:INVALID_TEXT_DRAW;
 static Text:s_HealthBarBackground = Text:INVALID_TEXT_DRAW;
 static PlayerText:s_HealthBarForeground[MAX_PLAYERS] = {PlayerText:INVALID_TEXT_DRAW, ...};
+static PlayerText:s_HealthBarText[MAX_PLAYERS] = {PlayerText:INVALID_TEXT_DRAW, ...};
+static PlayerText:s_ArmourBarText[MAX_PLAYERS] = {PlayerText:INVALID_TEXT_DRAW, ...};
 static s_DamageRangeSteps[55];
 static Float:s_DamageRangeRanges[55][WC_MAX_DAMAGE_RANGES];
 static Float:s_DamageRangeValues[55][WC_MAX_DAMAGE_RANGES];
@@ -2343,6 +2359,16 @@ public OnPlayerConnect(playerid)
 		s_HealthBarForeground[playerid] = PlayerText:INVALID_TEXT_DRAW;
 	}
 
+	if (s_HealthBarText[playerid] != PlayerText:INVALID_TEXT_DRAW) {
+		s_InternalPlayerTextDraw[playerid][s_HealthBarText[playerid]] = false;
+		s_HealthBarText[playerid] = PlayerText:INVALID_TEXT_DRAW;
+	}
+
+	if (s_ArmourBarText[playerid] != PlayerText:INVALID_TEXT_DRAW) {
+		s_InternalPlayerTextDraw[playerid][s_ArmourBarText[playerid]] = false;
+		s_ArmourBarText[playerid] = PlayerText:INVALID_TEXT_DRAW;
+	}
+
 	if (s_DamageFeedGiven[playerid] != PlayerText:INVALID_TEXT_DRAW) {
 		s_InternalPlayerTextDraw[playerid][s_DamageFeedGiven[playerid]] = false;
 		s_DamageFeedGiven[playerid] = PlayerText:INVALID_TEXT_DRAW;
@@ -2411,6 +2437,16 @@ public OnPlayerDisconnect(playerid, reason)
 	if (s_HealthBarForeground[playerid] != PlayerText:INVALID_TEXT_DRAW) {
 		PlayerTextDrawDestroy(playerid, s_HealthBarForeground[playerid]);
 		s_HealthBarForeground[playerid] = PlayerText:INVALID_TEXT_DRAW;
+	}
+
+	if (s_HealthBarText[playerid] != PlayerText:INVALID_TEXT_DRAW) {
+		PlayerTextDrawDestroy(playerid, s_HealthBarText[playerid]);
+		s_HealthBarText[playerid] = PlayerText:INVALID_TEXT_DRAW;
+	}
+
+	if (s_ArmourBarText[playerid] != PlayerText:INVALID_TEXT_DRAW) {
+		PlayerTextDrawDestroy(playerid, s_ArmourBarText[playerid]);
+		s_ArmourBarText[playerid] = PlayerText:INVALID_TEXT_DRAW;
 	}
 
 	if (s_DamageFeedGiven[playerid] != PlayerText:INVALID_TEXT_DRAW) {
@@ -4361,6 +4397,18 @@ static ScriptExit()
 			s_HealthBarForeground[playerid] = PlayerText:INVALID_TEXT_DRAW;
 		}
 
+		if (s_HealthBarText[playerid] != PlayerText:INVALID_TEXT_DRAW) {
+			PlayerTextDrawDestroy(playerid, s_HealthBarText[playerid]);
+			s_InternalPlayerTextDraw[playerid][s_HealthBarText[playerid]] = false;
+			s_HealthBarText[playerid] = PlayerText:INVALID_TEXT_DRAW;
+		}
+
+		if (s_ArmourBarText[playerid] != PlayerText:INVALID_TEXT_DRAW) {
+			PlayerTextDrawDestroy(playerid, s_ArmourBarText[playerid]);
+			s_InternalPlayerTextDraw[playerid][s_ArmourBarText[playerid]] = false;
+			s_ArmourBarText[playerid] = PlayerText:INVALID_TEXT_DRAW;
+		}
+
 		if (s_DamageFeedGiven[playerid] != PlayerText:INVALID_TEXT_DRAW) {
 			PlayerTextDrawDestroy(playerid, s_DamageFeedGiven[playerid]);
 			s_InternalPlayerTextDraw[playerid][s_DamageFeedGiven[playerid]] = false;
@@ -4506,12 +4554,77 @@ static UpdateHealthBar(playerid, bool:force = false)
 			s_InternalPlayerTextDraw[playerid][s_HealthBarForeground[playerid]] = false;
 			s_HealthBarForeground[playerid] = PlayerText:INVALID_TEXT_DRAW;
 		}
+
+		new text[WC_MAX_WEAPON_NAME];
+		if (s_HealthBarVisible[playerid] && !s_IsDying[playerid] && WC_OnHealthBarTextUpdate(playerid, health, armour, text)) {
+			if (s_HealthBarText[playerid] == PlayerText:INVALID_TEXT_DRAW) {
+				s_HealthBarText[playerid] = CreatePlayerTextDraw(
+					playerid,
+					577,
+					67.4,
+					text
+				);
+				if (s_HealthBarText[playerid] == PlayerText:INVALID_TEXT_DRAW) {
+					printf("(wc) WARN: Unable to create player healthbar text");
+				} else {
+					s_InternalPlayerTextDraw[playerid][s_HealthBarText[playerid]] = true;
+					PlayerTextDrawBackgroundColor(playerid, s_HealthBarText[playerid], WC_HEALTH_TEXT_COLOR);
+					PlayerTextDrawFont(playerid, s_HealthBarText[playerid], 2);
+					PlayerTextDrawLetterSize(playerid, s_HealthBarText[playerid], 0.2300, 0.7000);
+					PlayerTextDrawColor(playerid, s_HealthBarText[playerid], WC_HEALTH_TEXT_COLOR);
+					PlayerTextDrawSetOutline(playerid, s_HealthBarText[playerid], 0);
+					PlayerTextDrawSetProportional(playerid, s_HealthBarText[playerid], 1);
+					PlayerTextDrawSetShadow(playerid, s_HealthBarText[playerid], 0);
+					PlayerTextDrawAlignment(playerid, s_HealthBarText[playerid], 2);
+					PlayerTextDrawShow(playerid, s_HealthBarText[playerid]);
+				}
+			} else if (s_InternalPlayerTextDraw[playerid][s_HealthBarText[playerid]]) {
+				PlayerTextDrawSetString(playerid, s_HealthBarText[playerid], text);
+				PlayerTextDrawShow(playerid, s_HealthBarText[playerid]);
+			}
+		} else if (s_HealthBarText[playerid] != PlayerText:INVALID_TEXT_DRAW) {
+			PlayerTextDrawDestroy(playerid, s_HealthBarText[playerid]);
+			s_InternalPlayerTextDraw[playerid][s_HealthBarText[playerid]] = false;
+			s_HealthBarText[playerid] = PlayerText:INVALID_TEXT_DRAW;
+		}
 	}
 
 	if (armour != s_LastSentArmour[playerid]) {
 		s_LastSentArmour[playerid] = armour;
 
 		SetPlayerArmour(playerid, float(armour));
+		new text[WC_MAX_WEAPON_NAME];
+		if (s_HealthBarVisible[playerid] && !s_IsDying[playerid] && WC_OnArmourBarTextUpdate(playerid, health, armour, text)) {
+			if (s_ArmourBarText[playerid] == PlayerText:INVALID_TEXT_DRAW) {
+				s_ArmourBarText[playerid] = CreatePlayerTextDraw(
+					playerid,
+					577,
+					45.5,
+					text
+				);
+				if (s_ArmourBarText[playerid] == PlayerText:INVALID_TEXT_DRAW) {
+					printf("(wc) WARN: Unable to create player armour text");
+				} else {
+					s_InternalPlayerTextDraw[playerid][s_ArmourBarText[playerid]] = true;
+					PlayerTextDrawBackgroundColor(playerid, s_ArmourBarText[playerid], WC_ARMOUR_TEXT_COLOR);
+					PlayerTextDrawFont(playerid, s_ArmourBarText[playerid], 2);
+					PlayerTextDrawLetterSize(playerid, s_ArmourBarText[playerid], 0.2300, 0.7000);
+					PlayerTextDrawColor(playerid, s_ArmourBarText[playerid], WC_ARMOUR_TEXT_COLOR);
+					PlayerTextDrawSetOutline(playerid, s_ArmourBarText[playerid], 0);
+					PlayerTextDrawSetProportional(playerid, s_ArmourBarText[playerid], 1);
+					PlayerTextDrawSetShadow(playerid, s_ArmourBarText[playerid], 0);
+					PlayerTextDrawAlignment(playerid, s_ArmourBarText[playerid], 2);
+					PlayerTextDrawShow(playerid, s_ArmourBarText[playerid]);
+				}
+			} else if (s_InternalPlayerTextDraw[playerid][s_ArmourBarText[playerid]]) {
+				PlayerTextDrawSetString(playerid, s_ArmourBarText[playerid], text);
+				PlayerTextDrawShow(playerid, s_ArmourBarText[playerid]);
+			}
+		} else if (s_ArmourBarText[playerid] != PlayerText:INVALID_TEXT_DRAW) {
+			PlayerTextDrawDestroy(playerid, s_ArmourBarText[playerid]);
+			s_InternalPlayerTextDraw[playerid][s_ArmourBarText[playerid]] = false;
+			s_ArmourBarText[playerid] = PlayerText:INVALID_TEXT_DRAW;
+		}
 	}
 }
 
@@ -4539,6 +4652,14 @@ static SetHealthBarVisible(playerid, bool:toggle)
 	} else {
 		if (s_HealthBarForeground[playerid] != PlayerText:INVALID_TEXT_DRAW) {
 			PlayerTextDrawHide(playerid, s_HealthBarForeground[playerid]);
+		}
+
+		if (s_HealthBarText[playerid] != PlayerText:INVALID_TEXT_DRAW) {
+			PlayerTextDrawHide(playerid, s_HealthBarText[playerid]);
+		}
+
+		if (s_ArmourBarText[playerid] != PlayerText:INVALID_TEXT_DRAW) {
+			PlayerTextDrawHide(playerid, s_ArmourBarText[playerid]);
 		}
 
 		if (s_HealthBarBorder != Text:INVALID_TEXT_DRAW) {
@@ -5301,6 +5422,14 @@ static PlayerDeath(playerid, animlib[32], animname[32], anim_lock = 0, respawn_t
 
 	if (s_HealthBarForeground[playerid] != PlayerText:INVALID_TEXT_DRAW) {
 		PlayerTextDrawHide(playerid, s_HealthBarForeground[playerid]);
+	}
+
+	if (s_HealthBarText[playerid] != PlayerText:INVALID_TEXT_DRAW) {
+		PlayerTextDrawHide(playerid, s_HealthBarText[playerid]);
+	}
+
+	if (s_ArmourBarText[playerid] != PlayerText:INVALID_TEXT_DRAW) {
+		PlayerTextDrawHide(playerid, s_ArmourBarText[playerid]);
 	}
 
 	if (IsPlayerInCheckpoint(playerid)) {
@@ -6332,6 +6461,24 @@ CHAIN_FORWARD:WC_OnPlayerPrepareDeath(playerid, animlib[32], animname[32], &anim
 #endif
 #define OnRejectedHit(%0) CHAIN_PUBLIC:WC_OnRejectedHit(%0)
 CHAIN_FORWARD:WC_OnRejectedHit(playerid, hit[E_REJECTED_HIT]) = 1;
+
+
+#if defined _ALS_OnHealthBarTextUpdate
+	#undef OnHealthBarTextUpdate
+#else
+	#define _ALS_OnHealthBarTextUpdate
+#endif
+#define OnHealthBarTextUpdate(%0) CHAIN_PUBLIC:WC_OnHealthBarTextUpdate(%0)
+CHAIN_FORWARD:WC_OnHealthBarTextUpdate(playerid, health, armour, text[WC_MAX_WEAPON_NAME]) = 0;
+
+
+#if defined _ALS_OnArmourBarTextUpdate
+	#undef OnArmourBarTextUpdate
+#else
+	#define _ALS_OnArmourBarTextUpdate
+#endif
+#define OnArmourBarTextUpdate(%0) CHAIN_PUBLIC:WC_OnArmourBarTextUpdate(%0)
+CHAIN_FORWARD:WC_OnArmourBarTextUpdate(playerid, health, armour, text[WC_MAX_WEAPON_NAME]) = 0;
 
 
 #if WC_CUSTOM_VENDING_MACHINES
