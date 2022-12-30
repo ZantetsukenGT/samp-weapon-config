@@ -4198,7 +4198,11 @@ IPacket:WC_AIM_SYNC(playerid, BitStream:bs)
 
 static ScriptInit()
 {
+#if defined opws_fix_included_
+	s_LagCompMode = 0;
+#else
 	s_LagCompMode = GetConsoleVarAsInt("lagcompmode");
+#endif
 
 	if (s_LagCompMode) {
 		SetKnifeSync(false);
