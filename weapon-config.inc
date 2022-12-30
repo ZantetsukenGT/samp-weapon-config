@@ -992,8 +992,8 @@ static s_VehicleRespawnTimer[MAX_VEHICLES] = {-1, ...};
 	static Float:s_FakeQuat[MAX_PLAYERS][4];
 	static bool:s_SyncDataFrozen[MAX_PLAYERS];
 	static s_LastSyncData[MAX_PLAYERS][PR_OnFootSync];
-	static s_DisableSyncBugs = true;
-	static s_KnifeSync = true;
+	static bool:s_DisableSyncBugs = true;
+	static bool:s_KnifeSync = true;
 #endif
 
 native WC_IsValidVehicle(vehicleid) = IsValidVehicle;
