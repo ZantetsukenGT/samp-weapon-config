@@ -509,7 +509,7 @@ static const s_ValidDamageTaken[] = {
 // Default weapon damage. Connected to s_DamageType.
 // Melee weapons are multipliers because the damage differs
 // depending on type of punch/kick and fight style.
-static Float:s_WeaponDamage[] = {
+stock Float:s_WeaponDamage[] = {
 	1.0, // 0 - Fist
 	1.0, // 1 - Brass knuckles
 	1.0, // 2 - Golf club
@@ -571,7 +571,7 @@ static Float:s_WeaponDamage[] = {
 #assert DAMAGE_TYPE_STATIC == 1
 
 // Whether the damage is multiplied by the given/taken value (0) or always the same value (1)
-static s_DamageType[] = {
+stock s_DamageType[] = {
 	0, // 0 - Fist
 	0, // 1 - Brass knuckles
 	0, // 2 - Golf club
