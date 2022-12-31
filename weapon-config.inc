@@ -5558,7 +5558,7 @@ static DamageFeedUpdate(playerid, bool:modified = false)
 			PlayerTextDrawSetShadow(playerid, td, 0);
 			PlayerTextDrawAlignment(playerid, td, 2);
 			PlayerTextDrawSetOutline(playerid, td, 1);
-			PlayerTextDrawBackgroundColor(playerid, td, 0x0000001A);
+			PlayerTextDrawBackgroundColor(playerid, td, 0x00000044);
 
 			s_DamageFeedGiven[playerid] = td;
 		}
@@ -5578,7 +5578,7 @@ static DamageFeedUpdate(playerid, bool:modified = false)
 			PlayerTextDrawSetShadow(playerid, td, 0);
 			PlayerTextDrawAlignment(playerid, td, 2);
 			PlayerTextDrawSetOutline(playerid, td, 1);
-			PlayerTextDrawBackgroundColor(playerid, td, 0x0000001A);
+			PlayerTextDrawBackgroundColor(playerid, td, 0x00000044);
 
 			s_DamageFeedTaken[playerid] = td;
 		}
@@ -5652,7 +5652,7 @@ static DamageFeedUpdate(playerid, bool:modified = false)
 
 static DamageFeedUpdateText(playerid)
 {
-	new buf[64 * WC_FEED_HEIGHT] = "";
+	new buf[100 * WC_FEED_HEIGHT] = "";
 
 	for (new i = 0, weapon[32]; i < sizeof(s_DamageFeedHitsGiven[]) - 1; i++) {
 		if (!s_DamageFeedHitsGiven[playerid][i][e_Tick]) {
@@ -5669,21 +5669,32 @@ static DamageFeedUpdateText(playerid)
 			format(
 				buf,
 				sizeof(buf),
-				"%s%s +%.2f~n~",
+				"%s~w~-%d ~b~%s~n~",
 				buf,
-				weapon,
-				s_DamageFeedHitsGiven[playerid][i][e_Amount] + 0.009
+				floatround(s_DamageFeedHitsGiven[playerid][i][e_Amount] + 0.009),
+				weapon
 			);
 		} else {
+			new remainingHP[20];
+			new Float: finalHealth = s_PlayerHealth[s_DamageFeedHitsGiven[playerid][i][e_Issuer]];
+			new Float: finalArmour = s_PlayerArmour[s_DamageFeedHitsGiven[playerid][i][e_Issuer]];
+			if (finalArmour > 0.0)
+			{
+				format(remainingHP, sizeof(remainingHP), "~w~(%d)", floatround(finalHealth + finalArmour));
+			}
+			else
+			{
+				format(remainingHP, sizeof(remainingHP), "~w~(~r~~h~%d~w~)", floatround(finalHealth + finalArmour));
+			}
 			format(
 				buf,
 				sizeof(buf),
-				"%s%s - %s +%.2f (%.2f)~n~",
+				"%s~b~%s ~w~/ -%d ~b~%s %s~n~",
 				buf,
 				s_DamageFeedHitsGiven[playerid][i][e_Name],
+				floatround(s_DamageFeedHitsGiven[playerid][i][e_Amount] + 0.009),
 				weapon,
-				s_DamageFeedHitsGiven[playerid][i][e_Amount] + 0.009,
-				s_PlayerHealth[s_DamageFeedHitsGiven[playerid][i][e_Issuer]]
+				remainingHP
 			);
 		}
 	}
@@ -5712,26 +5723,37 @@ static DamageFeedUpdateText(playerid)
 			WC_GetWeaponName(s_DamageFeedHitsTaken[playerid][i][e_Weapon], weapon);
 		}
 
+		new remainingHP[20];
+		new Float: finalHealth = s_PlayerHealth[playerid];
+		new Float: finalArmour = s_PlayerArmour[playerid];
+		if (finalArmour > 0.0)
+		{
+			format(remainingHP, sizeof(remainingHP), "~w~(%d)", floatround(finalHealth + finalArmour));
+		}
+		else
+		{
+			format(remainingHP, sizeof(remainingHP), "~w~(~r~~h~%d~w~)", floatround(finalHealth + finalArmour));
+		}
 		if (s_DamageFeedHitsTaken[playerid][i][e_Issuer] == INVALID_PLAYER_ID) {
 			format(
 				buf,
 				sizeof(buf),
-				"%s%s -%.2f (%.2f)~n~",
+				"%s~w~-%d ~r~~h~%s %s~n~",
 				buf,
+				floatround(s_DamageFeedHitsTaken[playerid][i][e_Amount] + 0.009),
 				weapon,
-				s_DamageFeedHitsTaken[playerid][i][e_Amount] + 0.009,
-				s_PlayerHealth[playerid]
+				remainingHP
 			);
 		} else {
 			format(
 				buf,
 				sizeof(buf),
-				"%s%s - %s -%.2f (%.2f)~n~",
+				"%s~r~~h~%s ~w~/ -%d ~r~~h~%s %s~n~",
 				buf,
 				s_DamageFeedHitsTaken[playerid][i][e_Name],
+				floatround(s_DamageFeedHitsTaken[playerid][i][e_Amount] + 0.009),
 				weapon,
-				s_DamageFeedHitsTaken[playerid][i][e_Amount] + 0.009,
-				s_PlayerHealth[s_DamageFeedHitsGiven[playerid][i][e_Issuer]]
+				remainingHP
 			);
 		}
 	}
