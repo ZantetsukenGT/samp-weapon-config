@@ -143,6 +143,7 @@ static stock _WC_IncludeStates() <_ALS : _ALS_go> {}
 enum {
 	WC_NO_ERROR,
 	WC_NO_ISSUER,
+	WC_SNIPER_BUG,
 	WC_NO_DAMAGED,
 	WC_INVALID_DAMAGE,
 	WC_INVALID_DISTANCE
@@ -3388,7 +3389,7 @@ public OnPlayerGiveDamage(playerid, damagedid, Float:amount, weaponid, bodypart)
 
 	new Float:bullets, err;
 
-	if ((err = ProcessDamage(damagedid, playerid, amount, weaponid, bodypart, bullets))) {
+	if ((err = ProcessDamage(damagedid, playerid, playerid, amount, weaponid, bodypart, bullets))) {
 		if (err == WC_INVALID_DAMAGE) {
 			AddRejectedHit(playerid, damagedid, HIT_INVALID_DAMAGE, weaponid, _:amount);
 		}
@@ -3623,6 +3624,8 @@ public OnPlayerTakeDamage(playerid, issuerid, Float:amount, weaponid, bodypart)
 		}
 	}
 
+	// Get the real issuerid before its potentially set to INVALID_PLAYER_ID, just for a proper sniper bug detection
+	new realissuerid = issuerid;
 	// Should still be damaged by grenades or fire after someone has died
 	if (issuerid != INVALID_PLAYER_ID && IsPlayerConnected(issuerid)) {
 		if (HasSameTeam(playerid, issuerid)) {
@@ -3662,7 +3665,7 @@ public OnPlayerTakeDamage(playerid, issuerid, Float:amount, weaponid, bodypart)
 
 	new Float:bullets = 0.0, err;
 
-	if ((err = ProcessDamage(playerid, issuerid, amount, weaponid, bodypart, bullets))) {
+	if ((err = ProcessDamage(playerid, issuerid, realissuerid, amount, weaponid, bodypart, bullets))) {
 		if (err == WC_INVALID_DAMAGE) {
 			AddRejectedHit(issuerid, playerid, HIT_INVALID_DAMAGE, weaponid, _:amount);
 		}
@@ -4836,7 +4839,7 @@ public WC_SetSpawnForStreamedIn(playerid)
 	s_SpawnForStreamedIn[playerid] = true;
 }
 
-static ProcessDamage(&playerid, &issuerid, &Float:amount, &weaponid, &bodypart, &Float:bullets)
+static ProcessDamage(&playerid, &issuerid, &realissuerid, &Float:amount, &weaponid, &bodypart, &Float:bullets)
 {
 	if (amount < 0.0) {
 		return WC_INVALID_DAMAGE;
@@ -4931,8 +4934,8 @@ static ProcessDamage(&playerid, &issuerid, &Float:amount, &weaponid, &bodypart, 
 	}
 
 	// Bullet or melee damage must have an issuerid, otherwise something has gone wrong (e.g. sniper bug)
-	if (issuerid == INVALID_PLAYER_ID && (IsBulletWeapon(weaponid) || IsMeleeWeapon(weaponid))) {
-		return WC_NO_ISSUER;
+	if (realissuerid == INVALID_PLAYER_ID && (IsBulletWeapon(weaponid) || IsMeleeWeapon(weaponid))) {
+		return WC_SNIPER_BUG;
 	}
 
 	// Punching with a parachute
