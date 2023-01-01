@@ -5552,7 +5552,7 @@ static DamageFeedUpdate(playerid, bool:modified = false)
 		} else {
 			s_InternalPlayerTextDraw[playerid][td] = true;
 
-			PlayerTextDrawLetterSize(playerid, td, 0.2, 0.9);
+			PlayerTextDrawLetterSize(playerid, td, 0.18, 0.9);
 			PlayerTextDrawColor(playerid, td, WC_FEED_GIVEN_COLOR);
 			PlayerTextDrawFont(playerid, td, 1);
 			PlayerTextDrawSetShadow(playerid, td, 0);
@@ -5572,7 +5572,7 @@ static DamageFeedUpdate(playerid, bool:modified = false)
 		} else {
 			s_InternalPlayerTextDraw[playerid][td] = true;
 
-			PlayerTextDrawLetterSize(playerid, td, 0.2, 0.9);
+			PlayerTextDrawLetterSize(playerid, td, 0.18, 0.9);
 			PlayerTextDrawColor(playerid, td, WC_FEED_TAKEN_COLOR);
 			PlayerTextDrawFont(playerid, td, 1);
 			PlayerTextDrawSetShadow(playerid, td, 0);
