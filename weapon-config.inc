@@ -4681,7 +4681,7 @@ static SpawnPlayerInPlace(playerid) {
 	GetPlayerPos(playerid, x, y, z);
 	GetPlayerFacingAngle(playerid, r);
 
-	SetSpawnInfo(playerid, s_PlayerTeam[playerid], GetPlayerSkin(playerid), x, y, z, r, 0, 0, 0, 0, 0, 0);
+	SetSpawnInfo(playerid, s_PlayerTeam[playerid], GetPlayerSkin(playerid), x, y, z - 0.5, r, 0, 0, 0, 0, 0, 0);
 
 	s_SpawnInfoModified[playerid] = true;
 
