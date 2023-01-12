@@ -2518,8 +2518,8 @@ public OnPlayerSpawn(playerid)
 
 		UpdateHealthBar(playerid);
 
-		SetPlayerPos(playerid, s_SyncData[playerid][e_PosX], s_SyncData[playerid][e_PosY], s_SyncData[playerid][e_PosZ]);
-		SetPlayerFacingAngle(playerid, s_SyncData[playerid][e_PosA]);
+		//SetPlayerPos(playerid, s_SyncData[playerid][e_PosX], s_SyncData[playerid][e_PosY], s_SyncData[playerid][e_PosZ]);
+		//SetPlayerFacingAngle(playerid, s_SyncData[playerid][e_PosA]);
 
 		SetPlayerSkin(playerid, s_SyncData[playerid][e_Skin]);
 		SetPlayerTeam(playerid, s_SyncData[playerid][e_Team]);
