@@ -1043,7 +1043,7 @@ stock IsMeleeWeapon(weaponid)
 
 stock WC_IsPlayerSpawned(playerid)
 {
-	if (s_IsDying[playerid] || s_BeingResynced[playerid]) {
+	if (s_IsDying[playerid]) {
 		return false;
 	}
 
@@ -2717,7 +2717,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 		}
 	#endif
 
-	if (s_BeingResynced[playerid] || s_ForceClassSelection[playerid]) {
+	if (s_ForceClassSelection[playerid]) {
 		return 1;
 	}
 
@@ -3227,6 +3227,7 @@ public OnPlayerUpdate(playerid)
 
 public OnPlayerGiveDamage(playerid, damagedid, Float:amount, weaponid, bodypart)
 {
+#if !defined opws_fix_included_
 	if (!IsHighRateWeapon(weaponid)) {
 		DebugMessage(playerid, "OnPlayerGiveDamage(%d gave %f to %d using %d on bodypart %d)", playerid, amount, damagedid, weaponid, bodypart);
 	}
@@ -3494,6 +3495,7 @@ public OnPlayerGiveDamage(playerid, damagedid, Float:amount, weaponid, bodypart)
 		InflictDamage(damagedid, amount, playerid, weaponid, bodypart);
 	}
 
+#endif
 	// Don't send OnPlayerGiveDamage to the rest of the script, since it should not be used
 	return 0;
 }
@@ -3637,10 +3639,6 @@ public OnPlayerTakeDamage(playerid, issuerid, Float:amount, weaponid, bodypart)
 			return 0;
 		}
 
-		if (s_BeingResynced[issuerid]) {
-			return 0;
-		}
-
 		// https://github.com/oscar-broman/samp-weapon-config/issues/104
 		if (weaponid == WEAPON_COLLISION
 		|| weaponid == WEAPON_DROWN) {
@@ -3695,6 +3693,7 @@ public OnPlayerTakeDamage(playerid, issuerid, Float:amount, weaponid, bodypart)
 
 public OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY, Float:fZ)
 {
+#if !defined opws_fix_included_
 	#if WC_CUSTOM_VENDING_MACHINES
 		if (s_VendingUseTimer[playerid] != -1) {
 			KillTimer(s_VendingUseTimer[playerid]);
@@ -3982,7 +3981,8 @@ public OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY
 		}
 	}
 
-	return retval;
+#endif
+	return WC_OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, fX, fY, fZ);
 }
 
 forward WC_KillVehicle(vehicleid, killerid);
@@ -4469,7 +4469,7 @@ static Float:WC_Bar_Calculate(Float:width, Float:max, Float:value)
 
 static UpdateHealthBar(playerid, bool:force = false)
 {
-	if (s_BeingResynced[playerid] || s_ForceClassSelection[playerid]) {
+	if (s_ForceClassSelection[playerid]) {
 		return;
 	}
 
