@@ -5314,12 +5314,12 @@ static UpdateHealthBar(playerid, bool:force = false)
 					printf("(wc) WARN: Unable to create player healthbar text");
 				} else {
 					s_InternalPlayerTextDraw[playerid][s_HealthBarText[playerid]] = true;
-					PlayerTextDrawBackgroundColor(playerid, s_HealthBarText[playerid], WC_HEALTH_TEXT_COLOR);
+					PlayerTextDrawBackgroundColour(playerid, s_HealthBarText[playerid], WC_HEALTH_TEXT_COLOR);
 					PlayerTextDrawFont(playerid, s_HealthBarText[playerid], 2);
 					PlayerTextDrawLetterSize(playerid, s_HealthBarText[playerid], 0.2300, 0.7000);
-					PlayerTextDrawColor(playerid, s_HealthBarText[playerid], WC_HEALTH_TEXT_COLOR);
+					PlayerTextDrawColour(playerid, s_HealthBarText[playerid], WC_HEALTH_TEXT_COLOR);
 					PlayerTextDrawSetOutline(playerid, s_HealthBarText[playerid], 0);
-					PlayerTextDrawSetProportional(playerid, s_HealthBarText[playerid], 1);
+					PlayerTextDrawSetProportional(playerid, s_HealthBarText[playerid], true);
 					PlayerTextDrawSetShadow(playerid, s_HealthBarText[playerid], 0);
 					PlayerTextDrawAlignment(playerid, s_HealthBarText[playerid], 2);
 					PlayerTextDrawShow(playerid, s_HealthBarText[playerid]);
@@ -5352,12 +5352,12 @@ static UpdateHealthBar(playerid, bool:force = false)
 					printf("(wc) WARN: Unable to create player armour text");
 				} else {
 					s_InternalPlayerTextDraw[playerid][s_ArmourBarText[playerid]] = true;
-					PlayerTextDrawBackgroundColor(playerid, s_ArmourBarText[playerid], WC_ARMOUR_TEXT_COLOR);
+					PlayerTextDrawBackgroundColour(playerid, s_ArmourBarText[playerid], WC_ARMOUR_TEXT_COLOR);
 					PlayerTextDrawFont(playerid, s_ArmourBarText[playerid], 2);
 					PlayerTextDrawLetterSize(playerid, s_ArmourBarText[playerid], 0.2300, 0.7000);
-					PlayerTextDrawColor(playerid, s_ArmourBarText[playerid], WC_ARMOUR_TEXT_COLOR);
+					PlayerTextDrawColour(playerid, s_ArmourBarText[playerid], WC_ARMOUR_TEXT_COLOR);
 					PlayerTextDrawSetOutline(playerid, s_ArmourBarText[playerid], 0);
-					PlayerTextDrawSetProportional(playerid, s_ArmourBarText[playerid], 1);
+					PlayerTextDrawSetProportional(playerid, s_ArmourBarText[playerid], true);
 					PlayerTextDrawSetShadow(playerid, s_ArmourBarText[playerid], 0);
 					PlayerTextDrawAlignment(playerid, s_ArmourBarText[playerid], 2);
 					PlayerTextDrawShow(playerid, s_ArmourBarText[playerid]);
@@ -6377,12 +6377,12 @@ static DamageFeedUpdate(playerid, bool:modified = false)
 			s_InternalPlayerTextDraw[playerid][td] = true;
 
 			PlayerTextDrawLetterSize(playerid, td, 0.18, 0.9);
-			PlayerTextDrawColor(playerid, td, WC_FEED_GIVEN_COLOR);
+			PlayerTextDrawColour(playerid, td, WC_FEED_GIVEN_COLOR);
 			PlayerTextDrawFont(playerid, td, 1);
 			PlayerTextDrawSetShadow(playerid, td, 0);
 			PlayerTextDrawAlignment(playerid, td, TEXT_DRAW_ALIGN:2);
 			PlayerTextDrawSetOutline(playerid, td, 1);
-			PlayerTextDrawBackgroundColor(playerid, td, 0x00000044);
+			PlayerTextDrawBackgroundColour(playerid, td, 0x00000044);
 
 			s_DamageFeedGiven[playerid] = td;
 		}
@@ -6397,12 +6397,12 @@ static DamageFeedUpdate(playerid, bool:modified = false)
 			s_InternalPlayerTextDraw[playerid][td] = true;
 
 			PlayerTextDrawLetterSize(playerid, td, 0.18, 0.9);
-			PlayerTextDrawColor(playerid, td, WC_FEED_TAKEN_COLOR);
+			PlayerTextDrawColour(playerid, td, WC_FEED_TAKEN_COLOR);
 			PlayerTextDrawFont(playerid, td, 1);
 			PlayerTextDrawSetShadow(playerid, td, 0);
 			PlayerTextDrawAlignment(playerid, td, TEXT_DRAW_ALIGN:2);
 			PlayerTextDrawSetOutline(playerid, td, 1);
-			PlayerTextDrawBackgroundColor(playerid, td, 0x00000044);
+			PlayerTextDrawBackgroundColour(playerid, td, 0x00000044);
 
 			s_DamageFeedTaken[playerid] = td;
 		}
