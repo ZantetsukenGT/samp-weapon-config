@@ -4167,6 +4167,7 @@ public OnPlayerGiveDamage(playerid, damagedid, Float:amount, WEAPON:weaponid, bo
 		InflictDamage(damagedid, amount, playerid, weaponid, bodypart);
 	}
 
+#endif
 	// Don't send OnPlayerGiveDamage to the rest of the script, since it should not be used
 	return 0;
 }
